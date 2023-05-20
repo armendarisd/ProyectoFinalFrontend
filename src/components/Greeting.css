@@ -1,0 +1,48 @@
+.turno-app {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .turno-app h1 {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .turno-app form {
+    margin-bottom: 20px;
+  }
+  
+  .turno-app label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .turno-app input,
+  .turno-app textarea {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .turno-app button {
+    padding: 8px 16px;
+    font-size: 14px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .turno-app button[type='submit'] {
+    background-color: #28a745;
+  }
+  
+  .turno-app p {
+    margin-bottom: 5px;
+  }
+  
