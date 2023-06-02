@@ -1,8 +1,8 @@
+import React, { useState } from 'react';
 import './App.css';
-import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 // Componente de registro de usuario
@@ -83,11 +83,16 @@ function RegistrationForm({ onRegister }) {
 // Componente de creación de turnos
 function AppointmentForm({ onAppointmentCreate }) {
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
   const [dateError, setDateError] = useState('');
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);
     setDateError('');
+  };
+
+  const handleTimeSelect = (time) => {
+    setSelectedTime(time);
   };
 
   const handleSubmit = (e) => {
@@ -98,207 +103,189 @@ function AppointmentForm({ onAppointmentCreate }) {
       return;
     }
 
-    onAppointmentCreate(selectedDate);
+    if (!selectedTime) {
+      setDateError('Seleccione una hora');
+      return;
+    }
+
+    const dateTime = new Date(selectedDate);
+    const [hours, minutes] = selectedTime.split(':');
+    dateTime.setHours(hours);
+    dateTime.setMinutes(minutes);
+
+    onAppointmentCreate(dateTime);
+
     setSelectedDate(null);
+    setSelectedTime(null);
     setDateError('');
   };
 
   return (
     <div className="appointment-form">
-      <h2>Creación de Turnos</h2>
+      <h2>Crear Turno</h2>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Fecha:</label>
-          <DatePicker
-            selected={selectedDate}
-            onChange={handleDateSelect}
-            dateFormat="dd/MM/yyyy"
-            placeholderText="Seleccione una fecha"
-          />
-          {dateError && <span className="error">{dateError}</span>}
+          <DatePicker selected={selectedDate} onChange={handleDateSelect} dateFormat="dd/MM/yyyy" />
         </div>
-        <button type="submit">Programar Turno</button>
+        <div className="form-group">
+          <label>Hora:</label>
+          <input type="time" value={selectedTime} onChange={(e) => handleTimeSelect(e.target.value)} />
+        </div>
+        {dateError && <span className="error">{dateError}</span>}
+        <button type="submit">Crear</button>
       </form>
     </div>
   );
 }
 
 // Componente de notificaciones
-function Notifications({ notifications }) {
+function Notifications({ appointments }) {
+  // Obtener la fecha actual
+  const now = new Date();
+
+  // Obtener la fecha y hora en 24 horas a partir de ahora
+  const next24Hours = new Date();
+  next24Hours.setHours(next24Hours.getHours() + 24);
+
+  // Filtrar las citas dentro de las próximas 24 horas
+  const upcomingAppointments = appointments.filter(
+    (appointment) => appointment.date >= now && appointment.date <= next24Hours
+  );
+
   return (
     <div className="notifications">
       <h2>Notificaciones</h2>
-      {notifications.map((notification, index) => (
-        <div className="notification" key={index}>
-          {notification}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// Componente de agenda de turnos
-function Agenda({ appointments, onRate }) {
-  const [comment, setComment] = useState('');
-  const [rating, setRating] = useState(1);
-
-  const handleCommentChange = (e) => {
-    setComment(e.target.value);
-  };
-
-  const handleRatingChange = (e) => {
-    setRating(Number(e.target.value));
-  };
-
-  const handleRateAppointment = (index) => {
-    const appointment = appointments[index];
-    const currentDate = new Date();
-
-    if (appointment.date > currentDate) {
-      toast.error('No se puede calificar un evento futuro');
-      return;
-    }
-
-    if (appointment.rating !== null) {
-      toast.warning('Ya se ha calificado este evento');
-      return;
-    }
-
-    const updatedAppointments = [...appointments];
-    updatedAppointments[index] = {
-      ...appointment,
-      comment,
-      rating,
-    };
-
-    setComment('');
-    setRating(1);
-    onRate(updatedAppointments);
-  };
-
-  return (
-    <div className="agenda">
-      <h2>Agenda</h2>
-      {appointments.length > 0 ? (
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Comentario</th>
-              <th>Calificación</th>
-            </tr>
-          </thead>
-          <tbody>
-            {appointments.map((appointment, index) => (
-              <tr key={index}>
-                <td>{appointment.date.toLocaleDateString()}</td>
-                <td>{appointment.comment}</td>
-                <td>
-                  {appointment.rating !== null ? (
-                    <>
-                      {appointment.rating}{' '}
-                      <span className="stars">
-                        {Array.from({ length: appointment.rating }, (_, i) => (
-                          <i className="fa fa-star" key={i}></i>
-                        ))}
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <input type="text" value={comment} onChange={handleCommentChange} />
-                      <select value={rating} onChange={handleRatingChange}>
-                        <option value={1}>1 estrella</option>
-                        <option value={2}>2 estrellas</option>
-                        <option value={3}>3 estrellas</option>
-                        <option value={4}>4 estrellas</option>
-                        <option value={5}>5 estrellas</option>
-                      </select>
-                      <button onClick={() => handleRateAppointment(index)}>Calificar</button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {upcomingAppointments.length > 0 ? (
+        upcomingAppointments.map((appointment, index) => (
+          <div className="notification" key={index}>
+            <div className="notification-info">
+              <div>RECORDATORIO: Tienes una cita para mañana con Fecha: {appointment.date.toLocaleString()}</div>
+            </div>
+          </div>
+        ))
       ) : (
-        <p>No hay turnos programados</p>
+        <p>No hay notificaciones para las próximas 24 horas</p>
       )}
     </div>
   );
 }
 
-// Componente principal de la aplicación
+// Componente principal
+
+
 function App() {
-  const [user, setUser] = useState(null);
   const [appointments, setAppointments] = useState([]);
-  const [notifications, setNotifications] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [comment, setComment] = useState('');
 
-  const handleRegister = (userData) => {
-    setUser(userData);
+  const handleRegister = (user) => {
+    setUsers((prevUsers) => [...prevUsers, user]);
+    toast.success('Usuario registrado correctamente');
   };
 
-  const handleAppointmentCreate = (date) => {
-    setAppointments([...appointments, { date, comment: null, rating: null }]);
-    setNotifications([
-      ...notifications,
-      `Recordatorio: tienes un turno programado para el ${date}`,
+  const handleAppointmentCreate = (dateTime) => {
+    setAppointments((prevAppointments) => [
+      ...prevAppointments,
+      { date: dateTime, comment: null, rating: null },
     ]);
+    toast.success('Turno creado correctamente');
   };
 
-  const handleRateAppointment = (updatedAppointments) => {
+  const handleRateAppointment = (index, rating) => {
+    const updatedAppointments = [...appointments];
+    updatedAppointments[index].rating = rating;
     setAppointments(updatedAppointments);
   };
 
-  useEffect(() => {
-    const currentDate = new Date();
-    const notificationDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000);
+  const handleCommentChange = (e) => {
+    setComment(e.target.value);
+  };
 
-    const timeoutId = setTimeout(() => {
-      const upcomingAppointments = appointments.filter(
-        (appointment) => appointment.date.toLocaleDateString() === notificationDate.toLocaleDateString()
-      );
+  const handleCommentSubmit = (index) => {
+    const updatedAppointments = [...appointments];
+    updatedAppointments[index].comment = comment;
+    setAppointments(updatedAppointments);
+    setComment('');
+    toast.success('Comentario agregado correctamente');
+  };
 
-      if (upcomingAppointments.length > 0) {
-        toast.info(`Tienes ${upcomingAppointments.length} eventos próximos en 24 horas`);
-      }
-    }, notificationDate.getTime() - currentDate.getTime());
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [appointments]);
+  const now = new Date();
 
   return (
     <div className="app">
       <ToastContainer />
-      <header>
-        <nav>
-          <h1>MeTocaFinal LTDA.</h1>
-          <button className="notification-btn">Notificaciones ({notifications.length})</button>
-        </nav>
-      </header>
-      <main>
-        <div className="container">
-          {!user && <RegistrationForm onRegister={handleRegister} />}
-          {user && (
-            <div>
-              <h1>Bienvenido, {user.name}!</h1>
-              <div className="dashboard">
-                <div className="sidebar">
-                  <AppointmentForm onAppointmentCreate={handleAppointmentCreate} />
-                  <Notifications notifications={notifications} />
-                </div>
-                <div className="content">
-                  <Agenda appointments={appointments} onRate={handleRateAppointment} />
-                </div>
-              </div>
-            </div>
-          )}
+
+      {!users.length && <RegistrationForm onRegister={handleRegister} />}
+      {users.length > 0 && (
+        <div>
+          <h1>Bienvenido, {users[users.length - 1].name}!</h1>
+          <AppointmentForm onAppointmentCreate={handleAppointmentCreate} />
+
+          <div className="agenda">
+            <h2>Agenda</h2>
+            {appointments.length > 0 ? (
+              <ul>
+                {appointments.map((appointment, index) => {
+                  const hasPassed = appointment.date < now;
+
+                  return (
+                    <li key={index}>
+                      {appointment.date.toLocaleString()} -{' '}
+                      {hasPassed ? (
+                        <>
+                          {appointment.comment ? (
+                            <>
+                              Comentario: {appointment.comment} - Calificación: {appointment.rating}
+                            </>
+                          ) : (
+                            <>
+                              <select
+                                value={appointment.rating || ''}
+                                onChange={(e) => handleRateAppointment(index, parseInt(e.target.value))}
+                              >
+                                <option value="">Seleccionar calificación</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                              </select>
+                              <input
+                                type="text"
+                                placeholder="Agregar comentario"
+                                value={comment}
+                                onChange={handleCommentChange}
+                              />
+                              <button onClick={() => handleRateAppointment(index, null)}>
+                                Cancelar calificación
+                              </button>
+                              <button onClick={() => handleRateAppointment(index, null)}>
+                                Eliminar calificación y comentario
+                              </button>
+                              <button onClick={() => handleCommentSubmit(index)}>Enviar comentario</button>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        'Cita pendiente'
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p>No hay turnos</p>
+            )}
+          </div>
+
+          <Notifications appointments={appointments} />
         </div>
-      </main>
+      )}
     </div>
   );
 }
+
+
 
 export default App;
