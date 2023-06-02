@@ -1,156 +1,149 @@
 import React, { useState } from 'react';
 import "./Greeting.css";
 
-
-
 const Greeting = () => {
   const [usuario, setUsuario] = useState(null);
-  const [nombre, setNombre] = useState('');
-  const [email, setEmail] = useState('');
-  const [telefono, setTelefono] = useState('');
-  const [fechaTurno, setFechaTurno] = useState('');
   const [turnos, setTurnos] = useState([]);
-  const [calificacion, setCalificacion] = useState(0);
-  const [comentario, setComentario] = useState('');
+  const [notificados, setNotificados] = useState([]);
+  const [notificacion, setNotificacion] = useState(null);
 
-  const handleRegistro = (e) => {
-    e.preventDefault();
+  const registrarUsuario = (nombre, email, telefono) => {
     const nuevoUsuario = {
-      nombre: nombre,
-      email: email,
-      telefono: telefono,
-      historialTurnos: [],
+      nombre,
+      email,
+      telefono,
+      turnos: [],
     };
     setUsuario(nuevoUsuario);
-    console.log('Usuario registrado:', nuevoUsuario);
   };
 
-  const handleCrearTurno = (e) => {
-    e.preventDefault();
-    if (usuario) {
-      const nuevoTurno = { fecha: fechaTurno };
-      setTurnos([...turnos, nuevoTurno]);
-      setUsuario({
-        ...usuario,
-        historialTurnos: [...usuario.historialTurnos, nuevoTurno],
-      });
-      console.log('Turno creado:', nuevoTurno);
-      console.log(usuario);
-    } else {
-      console.log('No se puede crear el turno. Usuario no registrado.');
-    }
+  const crearTurno = (fecha) => {
+    const nuevoTurno = {
+      fecha,
+      valoracion: null,
+    };
+    setTurnos([...turnos, nuevoTurno]);
+    usuario.turnos.push(nuevoTurno);
   };
 
-  const handleCalificar = (e) => {
-    e.preventDefault();
-    if (usuario) {
-      const calificacionTurno = {
-        calificacion,
-        comentario,
-        fecha: new Date().toLocaleDateString(),
-      };
-      const ultimoTurno = usuario.historialTurnos[usuario.historialTurnos.length - 1];
-      ultimoTurno.calificacion = calificacionTurno;
-      setUsuario({ ...usuario });
-      console.log('Calificación y comentario:', calificacionTurno);
-    } else {
-      console.log('No se puede calificar. Usuario no registrado.');
-    }
+  const valorarTurno = (indiceTurno, valoracion, comentario) => {
+    usuario.turnos[indiceTurno].valoracion = {
+      valoracion,
+      comentario,
+    };
+  };
+
+  const notificarTurno = (indiceTurno) => {
+    const fechaTurno = usuario.turnos[indiceTurno].fecha;
+    const fechaNotificacion = new Date(fechaTurno);
+    fechaNotificacion.setDate(fechaNotificacion.getDate() - 1);
+    const notificacion = `Recordatorio: Tienes un turno programado para el día ${fechaTurno}`;
+    setNotificados([...notificados, indiceTurno]);
+    setNotificacion({ fecha: fechaNotificacion, mensaje: notificacion });
   };
 
   return (
     <div className='turno-app'>
-      {!usuario ? (
+      {!usuario && (
         <div>
-          <h1>Registro de Usuario</h1>
-          <form onSubmit={handleRegistro}>
-            <label>
-              Nombre:
-              <input
-                type="text"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                required
-              />
-            </label>
-            <br />
-            <label>
-              Email:
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </label>
-            <br />
-            <label>
-              Teléfono:
-              <input
-                type="text"
-                value={telefono}
-                onChange={(e) => setTelefono(e.target.value)}
-                required
-              />
-            </label>
-            <br />
+          <h2>Registro de usuario</h2>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const nombre = e.target.nombre.value;
+              const email = e.target.email.value;
+              const telefono = e.target.telefono.value;
+              registrarUsuario(nombre, email, telefono);
+            }}
+          >
+            <input type="text" name="nombre" placeholder="Nombre" />
+            <input type="email" name="email" placeholder="Correo electrónico" />
+            <input type="tel" name="telefono" placeholder="Teléfono" />
             <button type="submit">Registrarse</button>
           </form>
         </div>
-      ) : (
-        <div>
-          <h1>Crear Turno</h1>
-          <form onSubmit={handleCrearTurno}>
-            <label>
-              Fecha del turno:
-              <input
-                type="date"
-                value={fechaTurno}
-                onChange={(e) => setFechaTurno(e.target.value)}
-                required
-              />
-            </label>
-            <br />
-            <button type="submit">Crear Turno</button>
-          </form>
+      )}
 
-          <h1>Notificaciones y Recordatorios</h1>
-          {turnos.length > 0 ? (
-            turnos.map((turno, index) => (
-              <div key={index}>
-                <p>Turno programado para el {turno.fecha}</p>
-                {/* Aquí puedes implementar la lógica para enviar notificaciones */}
-              </div>
-            ))
-          ) : (
-            <p>No hay turnos programados</p>
+      {usuario && (
+        <div >
+          <h2>Bienvenido, {usuario.nombre}!</h2>
+
+          <div className='notificacion'>
+            <h3>Creación de turnos</h3>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fecha = e.target.fecha.value;
+                crearTurno(fecha);
+                e.target.reset();
+              }}
+            >
+              <input type="date" name="fecha" />
+              <button type="submit">Crear turno</button>
+            </form>
+          </div>
+
+
+          <div className='notificacion'>
+            <h3>Valoración de turnos</h3>
+            {turnos.length > 0 ? (
+              <ul>
+                {turnos.map((turno, index) => (
+                  <li key={index}>
+                    <p>Fecha: {turno.fecha}</p>
+                    {turno.valoracion ? (
+                      <p>
+                        Valoración: {turno.valoracion.valoracion} estrellas<br />
+                        Comentario: {turno.valoracion.comentario}
+                      </p>
+                    ) : (
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          const valoracion = e.target.valoracion.value;
+                          const comentario = e.target.comentario.value;
+                          valorarTurno(index, valoracion, comentario);
+                          e.target.reset();
+                        }}
+                      >
+                        <input type="number" name="valoracion" placeholder="Valoración (1-5)" min="1" max="5" />
+                        <input type="text" name="comentario" placeholder="Comentario" />
+                        <button type="submit">Enviar valoración</button>
+                      </form>
+                    )}
+                    {!notificados.includes(index) && (
+                      <button onClick={() => notificarTurno(index)}>Notificar turno</button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No hay turnos registrados</p>
+            )}
+          </div>
+
+
+          {notificacion && (
+            <div className='notificacion'>
+              <h3>Notificación</h3>
+              <p>Fecha de la notificación: {notificacion.fecha.toLocaleDateString()}</p>
+              <p>{notificacion.mensaje}</p>
+            </div>
           )}
 
-          <h1>Calificación y Comentarios</h1>
-          <form onSubmit={handleCalificar}>
-            <label>
-              Calificación:
-              <input
-                type="number"
-                min="1"
-                max="5"
-                value={calificacion}
-                onChange={(e) => setCalificacion(Number(e.target.value))}
-                required
-              />
-            </label>
-            <br />
-            <label>
-              Comentario:
-              <textarea
-                value={comentario}
-                onChange={(e) => setComentario(e.target.value)}
-                required
-              />
-            </label>
-            <br />
-            <button type="submit">Enviar Calificación</button>
-          </form>
+          {notificados.length > 0 && (
+            <div className='notificacion'>
+              <h3>Turnos notificados</h3>
+              <ul>
+                {notificados.map((indice) => (
+                  <li key={indice}>
+                    <p>Fecha: {turnos[indice].fecha}</p>
+                    <p>Mensaje de notificación: {notificacion.mensaje}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -158,3 +151,7 @@ const Greeting = () => {
 };
 
 export default Greeting;
+
+
+
+

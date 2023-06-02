@@ -1,48 +1,121 @@
 .turno-app {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    font-family: Arial, sans-serif;
-  }
+  font-family: Arial, sans-serif;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
   
-  .turno-app h1 {
-    font-size: 24px;
-    margin-bottom: 10px;
-  }
-  
-  .turno-app form {
-    margin-bottom: 20px;
-  }
-  
-  .turno-app label {
-    display: block;
-    margin-bottom: 5px;
-  }
-  
-  .turno-app input,
-  .turno-app textarea {
-    width: 100%;
-    padding: 8px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  
-  .turno-app button {
-    padding: 8px 16px;
-    font-size: 14px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .turno-app button[type='submit'] {
-    background-color: #28a745;
-  }
-  
-  .turno-app p {
-    margin-bottom: 5px;
-  }
-  
+}
+
+h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+h3 {
+  font-size: 18px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 10px;
+}
+
+
+form {
+  margin-bottom: 20px;
+}
+
+input,
+button {
+  padding: 10px;
+  margin-right: 10px;
+}
+
+button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 10px;
+}
+
+p {
+  margin: 0;
+}
+
+.notificaciones {
+  flex: 1 1 300px;
+  margin: 10px;
+}
+
+
+.notificacion {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #f5f5f5;
+  float: left; /* Posicionar a la izquierda */
+  width: 100%; /* Ancho de la sección de notificación */
+  margin-right: 20px; /* Espacio entre la notificación y el contenido principal */
+  flex: 1 1 300px;
+  margin: 10px;
+}
+
+.notificacion h3 {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.notificacion p {
+  margin-bottom: 5px;
+}
+
+.notificacion p.fecha {
+  font-style: italic;
+}
+
+.notificacion p.mensaje {
+  font-weight: bold;
+}
+
+.turnos-notificados {
+  margin-top: 20px;
+}
+
+.turnos-notificados h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.turnos-notificados ul {
+  padding-left: 20px;
+}
+
+.turnos-notificados li {
+  margin-bottom: 5px;
+}
+
+.turnos-notificados p {
+  margin: 0;
+}
+
+/* Adjusting the images */
+
+#doctor-image {
+  max-width: 100%;
+  height: 20%;
+  margin-bottom: 10px;
+}
+
+#citas-image {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 10px;
+}
